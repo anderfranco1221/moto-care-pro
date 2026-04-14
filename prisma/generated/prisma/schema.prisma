@@ -1,0 +1,55 @@
+model User {
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String?
+  password     String
+  createdAt    DateTime      @default(now())
+  motorcycles  Motorcycle[]
+  appointments Appointment[]
+}
+
+model Motorcycle {
+  id           String        @id @default(uuid())
+  vin          String        @unique
+  brand        String
+  model        String
+  year         Int
+  ownerId      String
+  owner        User          @relation(fields: [ownerId], references: [id])
+  services     Service[]
+  appointments Appointment[]
+}
+
+model Service {
+  id           String     @id @default(uuid())
+  motorcycleId String
+  description  String
+  performedAt  DateTime   @default(now())
+  mechanic     String?
+  motorcycle   Motorcycle @relation(fields: [motorcycleId], references: [id])
+}
+
+model Appointment {
+  id           String     @id @default(uuid())
+  userId       String
+  motorcycleId String
+  scheduledAt  DateTime
+  notes        String?
+  user         User       @relation(fields: [userId], references: [id])
+  motorcycle   Motorcycle @relation(fields: [motorcycleId], references: [id])
+}
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  //url      = env("DATABASE_URL");
+}

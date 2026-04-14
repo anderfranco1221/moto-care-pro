@@ -1,0 +1,94 @@
+# Node / Build
+node_modules/
+dist/
+build/
+lib/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests / Coverage
+coverage/
+.nyc_output/
+coverage-final.json
+
+# TypeScript
+*.tsbuildinfo
+
+# IDEs and editors
+/.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.swp
+*~
+
+# VS Code: keep tracked workspace settings, ignore the rest
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# dotenv environment variable files
+.env
+.env.*.local
+.env.local
+
+# Temp
+.temp/
+.tmp/
+.cache/
+parcel-cache/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Generated
+/generated/prisma/
+
+# Package manager files (keep lockfiles tracked)
+# Uncomment below lines to ignore lockfiles if desired
+# .package-lock.json
+# yarn.lock
+
+# Misc
+.npm/
+.pnp/
+.pnp.js
+.turbo/
+.firebase/
+
+# Docker
+docker-compose.override.yml
+
+# Jest / Testing artifacts
+test-results/
+jest-junit.xml
+
+# Editor backups
+*.bak
+*.orig
+
+# Build artifacts
+*.o
+*.obj

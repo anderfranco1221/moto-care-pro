@@ -1,0 +1,31 @@
+
+
+model Motorcycle {
+  id         String  @id @default(uuid())
+  vin        String  @unique
+  brand      String
+  model      String
+  year       Int
+  ownerId    String
+  owner      User    @relation(fields: [ownerId], references: [id])
+  services   Service[]
+  appointments Appointment[]
+}
+model Service {
+  id             String   @id @default(uuid())
+  motorcycleId   String
+  description    String
+  performedAt    DateTime @default(now())
+  mechanic       String?
+  motorcycle     Motorcycle @relation(fields: [motorcycleId], references: [id])
+}
+
+model Appointment {
+  id           String   @id @default(uuid())
+  userId       String
+  motorcycleId String
+  scheduledAt  DateTime
+  notes        String?
+  user         User      @relation(fields: [userId], references: [id])
+  motorcycle   Motorcycle @relation(fields: [motorcycleId], references: [id])
+}
