@@ -19,16 +19,19 @@ export class MotorcyclesController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.motorcyclesService.findOne(+id);
+    return this.motorcyclesService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMotorcycleDto: UpdateMotorcycleDto) {
-    return this.motorcyclesService.update(+id, updateMotorcycleDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateMotorcycleDto: UpdateMotorcycleDto,
+  ) {
+    return this.motorcyclesService.update(id, updateMotorcycleDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.motorcyclesService.remove(+id);
+    return this.motorcyclesService.remove(id);
   }
 }

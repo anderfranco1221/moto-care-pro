@@ -1,25 +1,20 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
-    "moduleResolution": "node",
-    "resolvePackageJsonExports": false,
-    "esModuleInterop": true,
-    "isolatedModules": true,
-    "declaration": true,
-    "removeComments": true,
+    "target": "ES2023",
+    "strict": true,                         // Activa todas las comprobaciones estrictas
+    "noImplicitAny": true,                 // Prohíbe el uso de 'any' implícito
+    "strictNullChecks": true,              // Te obliga a manejar null/undefined
+    "strictPropertyInitialization": true,  // Obliga a inicializar variables en clases
+    "noUnusedLocals": true,                // Te avisa si declaras una variable y no la usas
+    "noUnusedParameters": true,            // Te avisa si una función recibe parámetros que no usa
+    
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "ES2023",
-    "sourceMap": true,
-    "outDir": "./dist",
+    "esModuleInterop": true,
     "baseUrl": "./",
-    "incremental": true,
+    "outDir": "./dist",
     "skipLibCheck": true,
-    "strictNullChecks": true,
-    "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
+    "forceConsistentCasingInFileNames": true
   }
 }
