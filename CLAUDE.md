@@ -55,6 +55,10 @@ Project work plan and tracking are kept in Notion, not in this repo:
 - [Plan de trabajo](https://app.notion.com/p/moto-care-pro-Plan-de-trabajo-399bb268ed0c81dfa040f41c7f614a5a)
 - [Tablero de seguimiento](https://app.notion.com/p/735370911af544879e5bb8ef32859e24?v=f930a77250644b168a5253f624788b46)
 
+## Skills
+
+Use the `docker-expert` skill for anything touching Dockerfiles, `docker-compose.yml`, image builds, or registry pushes in this project. Use the `clean-code` skill when writing, refactoring, or reviewing any code here (NestJS services, controllers, DTOs, etc.), even if not explicitly requested.
+
 ## Conventions & gotchas
 
 - Services import Prisma types/enums from `@prisma/client` and inject `PrismaService` via `src/prisma/prisma.service`.
