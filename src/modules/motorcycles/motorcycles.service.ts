@@ -10,7 +10,7 @@ export class MotorcyclesService {
 
   create(createMotorcycleDto: CreateMotorcycleDto) {
     return this.prisma.motorcycle.create({
-      data: createMotorcycleDto as Prisma.MotorcycleCreateInput,
+      data: createMotorcycleDto as Prisma.MotorcycleUncheckedCreateInput,
     });
   }
 
@@ -31,7 +31,7 @@ export class MotorcyclesService {
       where: {
         id: id,
       },
-      data: updateMotorcycleDto as Prisma.MotorcycleCreateInput,
+      data: updateMotorcycleDto as Prisma.MotorcycleUncheckedUpdateInput,
     });
     return motorCycle;
   }

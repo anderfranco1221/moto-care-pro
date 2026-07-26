@@ -3,7 +3,7 @@ import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   async singIn(email: string, pass: string): Promise<any> {
     const user = await this.usersService.findOne(email);
