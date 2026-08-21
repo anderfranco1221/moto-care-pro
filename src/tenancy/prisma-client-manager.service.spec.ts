@@ -62,6 +62,16 @@ describe('PrismaClientManager', () => {
     expect(second).toBe(first);
   });
 
+  it('awaits a single connect for two concurrent calls on the same not-yet-cached schema', async () => {
+    const [a, b] = await Promise.all([
+      manager.getClient('tenant_a'),
+      manager.getClient('tenant_a'),
+    ]);
+
+    expect(createClientSpy).toHaveBeenCalledTimes(1);
+    expect(a).toBe(b);
+  });
+
   it('creates independent clients for different schemas', async () => {
     const a = await manager.getClient('tenant_a');
     const b = await manager.getClient('tenant_b');
