@@ -18,7 +18,7 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto, tenantId: string): Promise<User> {
     const existingUser = await this.findOne(createUserDto.email);
     if (existingUser) {
       throw new ConflictException('El email ya está registrado');
@@ -30,7 +30,12 @@ export class UsersService {
     );
 
     return this.prisma.user.create({
-      data: { ...createUserDto, password: hashedPassword },
+      data: {
+        email: createUserDto.email,
+        name: createUserDto.name,
+        password: hashedPassword,
+        tenantId,
+      },
     });
   }
 }

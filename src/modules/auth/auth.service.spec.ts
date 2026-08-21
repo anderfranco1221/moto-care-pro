@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
+import { TenantsService } from '../tenants/tenants.service';
 import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
@@ -11,16 +12,19 @@ describe('AuthService', () => {
     findOne: jest.Mock;
     create: jest.Mock;
   };
+  let tenantsService: { create: jest.Mock };
   let jwtService: { signAsync: jest.Mock };
 
   beforeEach(async () => {
     usersService = { findOne: jest.fn(), create: jest.fn() };
+    tenantsService = { create: jest.fn() };
     jwtService = { signAsync: jest.fn().mockResolvedValue('signed-token') };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: UsersService, useValue: usersService },
+        { provide: TenantsService, useValue: tenantsService },
         { provide: JwtService, useValue: jwtService },
       ],
     }).compile();
@@ -33,9 +37,16 @@ describe('AuthService', () => {
   });
 
   describe('register', () => {
-    it('crea el usuario y devuelve el resultado sin password', async () => {
+    it('crea el tenant y el usuario, y devuelve el resultado sin password', async () => {
+      tenantsService.create.mockResolvedValue({
+        id: 'tenant-1',
+        name: 'Taller',
+        schemaName: 'tenant_taller_abcd1234',
+        createdAt: new Date(),
+      });
       usersService.create.mockResolvedValue({
         id: '1',
+        tenantId: 'tenant-1',
         email: 'a@a.com',
         password: 'hashed',
         name: null,
@@ -45,12 +56,14 @@ describe('AuthService', () => {
       const result = await service.register({
         email: 'a@a.com',
         password: 'plain-password',
+        tenantName: 'Taller',
       });
 
-      expect(usersService.create).toHaveBeenCalledWith({
-        email: 'a@a.com',
-        password: 'plain-password',
-      });
+      expect(tenantsService.create).toHaveBeenCalledWith('Taller');
+      expect(usersService.create).toHaveBeenCalledWith(
+        { email: 'a@a.com', password: 'plain-password', tenantName: 'Taller' },
+        'tenant-1',
+      );
       expect(result).not.toHaveProperty('password');
       expect(result.email).toBe('a@a.com');
     });

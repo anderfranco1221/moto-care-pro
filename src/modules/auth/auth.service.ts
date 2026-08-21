@@ -4,6 +4,7 @@ import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
+import { TenantsService } from '../tenants/tenants.service';
 
 export type AuthenticatedUser = Omit<User, 'password'>;
 
@@ -11,11 +12,13 @@ export type AuthenticatedUser = Omit<User, 'password'>;
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
+    private readonly tenantsService: TenantsService,
     private readonly jwtService: JwtService,
   ) {}
 
   async register(createUserDto: CreateUserDto): Promise<AuthenticatedUser> {
-    const user = await this.usersService.create(createUserDto);
+    const tenant = await this.tenantsService.create(createUserDto.tenantName);
+    const user = await this.usersService.create(createUserDto, tenant.id);
     const { password, ...result } = user;
     return result;
   }

@@ -41,7 +41,11 @@ describe('AuthController', () => {
 
   describe('register', () => {
     it('delega en authService.register con el dto', async () => {
-      const dto = { email: 'a@a.com', password: 'plain-password' };
+      const dto = {
+        email: 'a@a.com',
+        password: 'plain-password',
+        tenantName: 'Taller',
+      };
 
       const result = await controller.register(dto);
 
