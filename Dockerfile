@@ -1,6 +1,10 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
+# postinstall runs `prisma generate` for both projects, so the schema must
+# already be present by the time `npm ci` triggers it.
+COPY prisma.config.ts prisma.tenant.config.ts ./
+COPY prisma ./prisma
 RUN npm ci
 
 FROM node:20-alpine AS build
