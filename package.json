@@ -78,6 +78,10 @@
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
+    "transformIgnorePatterns": [
+      "/node_modules/",
+      "/prisma/generated/"
+    ],
     "moduleNameMapper": {
       "^src/(.*)$": "<rootDir>/$1"
     },

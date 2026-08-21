@@ -69,10 +69,10 @@ describe('UsersService', () => {
         },
       );
 
-      const result = await service.create({
-        email: 'a@a.com',
-        password: 'plain-password',
-      });
+      const result = await service.create(
+        { email: 'a@a.com', password: 'plain-password', tenantName: 'Taller' },
+        'tenant-1',
+      );
 
       expect(prisma.user.create).toHaveBeenCalledTimes(1);
       expect(persistedPassword).not.toBe('plain-password');
@@ -86,7 +86,14 @@ describe('UsersService', () => {
       prisma.user.findFirst.mockResolvedValue({ id: '1', email: 'a@a.com' });
 
       await expect(
-        service.create({ email: 'a@a.com', password: 'plain-password' }),
+        service.create(
+          {
+            email: 'a@a.com',
+            password: 'plain-password',
+            tenantName: 'Taller',
+          },
+          'tenant-1',
+        ),
       ).rejects.toThrow(ConflictException);
       expect(prisma.user.create).not.toHaveBeenCalled();
     });
