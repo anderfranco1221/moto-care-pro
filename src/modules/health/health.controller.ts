@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('health')
 export class HealthController {
@@ -14,6 +15,7 @@ export class HealthController {
     private readonly configService: ConfigService,
   ) {}
 
+  @Public()
   @Get()
   async check() {
     if (this.configService.get<string>('HEALTH_CHECK_ENABLED') !== 'true') {
