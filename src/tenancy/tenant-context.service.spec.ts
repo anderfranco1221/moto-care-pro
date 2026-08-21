@@ -4,7 +4,6 @@ import { ClsModule } from 'nestjs-cls';
 import request from 'supertest';
 import { App } from 'supertest/types';
 import { TenantContextService } from './tenant-context.service';
-import { TenancyModule } from './tenancy.module';
 
 /**
  * Sets tenant context "as if" an auth middleware/strategy had already run
@@ -47,10 +46,9 @@ describe('TenantContextService (CLS propagation)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         ClsModule.forRoot({ global: true, middleware: { mount: true } }),
-        TenancyModule,
       ],
       controllers: [ProbeController],
-      providers: [DownstreamProbeService],
+      providers: [TenantContextService, DownstreamProbeService],
     }).compile();
 
     app = moduleFixture.createNestApplication();

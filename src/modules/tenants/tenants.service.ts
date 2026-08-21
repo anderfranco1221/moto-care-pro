@@ -22,10 +22,16 @@ export class TenantsService {
    * script actually creates the Postgres schema for this name.
    */
   private buildSchemaName(name: string): string {
+    // Fixed "tenant_" + "_" + 8 hex chars = 16 chars, leaving up to 47 for
+    // the slug within Postgres's 63-char identifier limit (see
+    // schema-name.util.ts's assertSafeSchemaName, which every schema name
+    // is validated against before it's ever used in SQL) — capped well
+    // under that so a long workshop name can't push it over.
     const slug = name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '_')
-      .replace(/^_+|_+$/g, '');
+      .replace(/^_+|_+$/g, '')
+      .slice(0, 40);
     return `tenant_${slug || 'workshop'}_${randomUUID().slice(0, 8)}`;
   }
 }

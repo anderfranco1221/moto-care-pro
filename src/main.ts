@@ -6,6 +6,10 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // Without this, Nest's lifecycle hooks (e.g. PrismaClientManager's
+  // onModuleDestroy, which disconnects every cached per-tenant client) never
+  // run on SIGTERM/SIGINT — only on an explicit app.close() (as in tests).
+  app.enableShutdownHooks();
 
   app.useGlobalPipes(
     new ValidationPipe({
