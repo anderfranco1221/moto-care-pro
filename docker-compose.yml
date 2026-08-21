@@ -24,6 +24,13 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://admin:1234@db:5432/moto-pro
+      # Interim single-schema placeholder (see src/prisma/tenant-prisma.service.ts)
+      # until Fase 2's PrismaClientManager provisions/routes real per-tenant
+      # schemas. TENANT_SCHEMA_NAME must exist before /motorcycles works —
+      # it is NOT auto-created by docker-entrypoint.sh yet (deferred to the
+      # migrate-tenants provisioning task).
+      TENANT_DATABASE_URL: postgresql://admin:1234@db:5432/moto-pro
+      TENANT_SCHEMA_NAME: tenant_dev
       PORT: 3001
       HEALTH_CHECK_ENABLED: 'true'
     ports:

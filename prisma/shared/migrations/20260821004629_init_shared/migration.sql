@@ -24,7 +24,7 @@ CREATE TABLE "User" (
 CREATE UNIQUE INDEX "Tenant_schemaName_key" ON "Tenant"("schemaName");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_tenantId_email_key" ON "User"("tenantId", "email");
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- AddForeignKey
 ALTER TABLE "User" ADD CONSTRAINT "User_tenantId_fkey" FOREIGN KEY ("tenantId") REFERENCES "Tenant"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

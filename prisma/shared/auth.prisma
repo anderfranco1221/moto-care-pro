@@ -10,10 +10,13 @@ model User {
   id        String   @id @default(uuid())
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
-  email     String
+  // Global unique, not per-tenant: UsersService.findOne(email) has no
+  // tenant filter (login doesn't know the tenant ahead of time), so a
+  // per-tenant unique constraint would let the same email exist under two
+  // tenants while the app can only ever resolve one of them at login.
+  // Revisit together if/when a tenant-aware login flow is built.
+  email     String   @unique
   name      String?
   password  String
   createdAt DateTime @default(now())
-
-  @@unique([tenantId, email])
 }

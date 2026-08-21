@@ -9,6 +9,8 @@ export default defineConfig({
     path: 'prisma/tenant/migrations',
   },
   datasource: {
-    url: process.env['DATABASE_URL'],
+    // Not DATABASE_URL: this project's migrations are meant to be replayed
+    // against per-tenant schemas, never against the shared project's `public`.
+    url: process.env['TENANT_DATABASE_URL'] ?? process.env['DATABASE_URL'],
   },
 });

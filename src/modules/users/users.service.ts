@@ -1,5 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { User } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,8 +18,15 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  async create(createUserDto: CreateUserDto, tenantId: string): Promise<User> {
-    const existingUser = await this.findOne(createUserDto.email);
+  /** `tx` lets AuthService.register run this in the same transaction as the new Tenant. */
+  async create(
+    createUserDto: CreateUserDto,
+    tenantId: string,
+    tx: Prisma.TransactionClient | PrismaService = this.prisma,
+  ): Promise<User> {
+    const existingUser = await tx.user.findFirst({
+      where: { email: createUserDto.email },
+    });
     if (existingUser) {
       throw new ConflictException('El email ya está registrado');
     }
@@ -29,7 +36,7 @@ export class UsersService {
       SALT_ROUNDS,
     );
 
-    return this.prisma.user.create({
+    return tx.user.create({
       data: {
         email: createUserDto.email,
         name: createUserDto.name,

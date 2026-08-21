@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { UsersService } from '../users/users.service';
 import { TenantsService } from '../tenants/tenants.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 export type AuthenticatedUser = Omit<User, 'password'>;
 
@@ -14,11 +15,21 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly tenantsService: TenantsService,
     private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService,
   ) {}
 
+  /**
+   * Creates the workshop's Tenant and its first (owner) User atomically —
+   * a duplicate email must not leave a dangling Tenant with no User.
+   */
   async register(createUserDto: CreateUserDto): Promise<AuthenticatedUser> {
-    const tenant = await this.tenantsService.create(createUserDto.tenantName);
-    const user = await this.usersService.create(createUserDto, tenant.id);
+    const user = await this.prisma.$transaction(async (tx) => {
+      const tenant = await this.tenantsService.create(
+        createUserDto.tenantName,
+        tx,
+      );
+      return this.usersService.create(createUserDto, tenant.id, tx);
+    });
     const { password, ...result } = user;
     return result;
   }

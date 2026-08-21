@@ -1,14 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { Tenant } from '@prisma/client';
+import { Prisma, Tenant } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TenantsService {
   constructor(private prisma: PrismaService) {}
 
-  create(name: string): Promise<Tenant> {
-    return this.prisma.tenant.create({
+  /** `tx` lets AuthService.register run this in the same transaction as the owner User. */
+  create(
+    name: string,
+    tx: Prisma.TransactionClient | PrismaService = this.prisma,
+  ): Promise<Tenant> {
+    return tx.tenant.create({
       data: { name, schemaName: this.buildSchemaName(name) },
     });
   }
