@@ -1,17 +1,23 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, Tenant, User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
 const SALT_ROUNDS = 10;
 
+export type UserWithTenant = User & { tenant: Tenant };
+
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findOne(email: string): Promise<User | null> {
-    return this.prisma.user.findFirst({ where: { email } });
+  /** Includes the Tenant relation — AuthService.signIn needs schemaName for the JWT claim. */
+  async findOne(email: string): Promise<UserWithTenant | null> {
+    return this.prisma.user.findFirst({
+      where: { email },
+      include: { tenant: true },
+    });
   }
 
   async findById(id: string): Promise<User | null> {

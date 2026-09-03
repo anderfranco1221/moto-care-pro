@@ -4,22 +4,18 @@
  * command, so this exists as a standalone runbook step. Run directly:
  *
  *   npm run migrate:tenants                  # all tenants in Tenant table
- *   npm run migrate:tenants -- tenant_abc123 # just one schema
+ *   npm run migrate:tenants -- tenant_abc123  # just one schema
  *
- * `provisionTenantSchema` is also imported at runtime by TenantsService
- * when Fase 2 task 4 wires it into tenant signup, so a new tenant's schema
- * is ready synchronously instead of needing this script run by hand.
- *
- * IMPORTANT: any future change to prisma/tenant/*.prisma (e.g. Fase 3's
- * insumos module) requires re-running this against every existing tenant,
- * not just new ones.
+ * The actual provisioning logic (provisionTenantSchema) lives in
+ * src/tenancy/ and is also called by AuthService.register at signup time —
+ * this script is for backfilling existing tenants after a tenant-project
+ * schema change (e.g. Fase 3's insumos module), which needs re-running
+ * against every existing tenant, not just new ones.
  */
 import 'dotenv/config';
-import { execFileSync } from 'node:child_process';
-import { Client } from 'pg';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { assertSafeSchemaName, withSchemaParam } from '../src/tenancy/schema-name.util';
+import { provisionTenantSchema } from '../src/tenancy/provision-tenant-schema';
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -27,32 +23,6 @@ function requireEnv(name: string): string {
     throw new Error(`${name} is not set`);
   }
   return value;
-}
-
-/** Creates the schema (if missing) and applies every pending tenant migration to it. */
-export async function provisionTenantSchema(schemaName: string): Promise<void> {
-  assertSafeSchemaName(schemaName);
-  const baseUrl = requireEnv('TENANT_DATABASE_URL');
-
-  const client = new Client({ connectionString: baseUrl });
-  await client.connect();
-  try {
-    await client.query(`CREATE SCHEMA IF NOT EXISTS "${schemaName}"`);
-  } finally {
-    await client.end();
-  }
-
-  execFileSync(
-    'npx',
-    ['prisma', 'migrate', 'deploy', '--config', 'prisma.tenant.config.ts'],
-    {
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        TENANT_DATABASE_URL: withSchemaParam(baseUrl, schemaName),
-      },
-    },
-  );
 }
 
 async function migrateAllTenants(): Promise<void> {
@@ -66,7 +36,9 @@ async function migrateAllTenants(): Promise<void> {
       return;
     }
     for (const tenant of tenants) {
-      console.log(`\n--- Migrating schema "${tenant.schemaName}" (tenant ${tenant.name}) ---`);
+      console.log(
+        `\n--- Migrating schema "${tenant.schemaName}" (tenant ${tenant.name}) ---`,
+      );
       await provisionTenantSchema(tenant.schemaName);
     }
   } finally {

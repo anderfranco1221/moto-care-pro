@@ -31,14 +31,19 @@ describe('UsersService', () => {
   });
 
   describe('findOne', () => {
-    it('busca un usuario por email', async () => {
-      const user = { id: '1', email: 'a@a.com' };
+    it('busca un usuario por email incluyendo su tenant', async () => {
+      const user = {
+        id: '1',
+        email: 'a@a.com',
+        tenant: { schemaName: 'tenant_x' },
+      };
       prisma.user.findFirst.mockResolvedValue(user);
 
       const result = await service.findOne('a@a.com');
 
       expect(prisma.user.findFirst).toHaveBeenCalledWith({
         where: { email: 'a@a.com' },
+        include: { tenant: true },
       });
       expect(result).toBe(user);
     });
