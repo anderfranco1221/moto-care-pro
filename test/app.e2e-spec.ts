@@ -16,11 +16,10 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  // The global JwtAuthGuard (see AppModule) protects every route without an
+  // explicit @Public() decorator — including the root route.
+  it('/ (GET) is rejected without a token', () => {
+    return request(app.getHttpServer()).get('/').expect(401);
   });
 
   afterEach(async () => {
