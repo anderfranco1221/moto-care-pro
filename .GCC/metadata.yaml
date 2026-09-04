@@ -1,0 +1,23 @@
+# Estado de infraestructura de GCC. Editado por la skill /gcc.
+version: 1
+created: "2026-09-03T22:03:30Z"
+config:
+  proactive_commits: true
+  merge_gate:
+    min_score: 80          # media mínima 0-100 para mergear una fase a master
+    block_on_blockers: true
+    feedback_to_memory: true
+current_branch: main
+branches:
+  main:
+    status: active
+    created: "2026-09-03T22:03:30Z"
+    parent: null
+last_commit: C003
+file_tree:
+  # Rutas relevantes que GCC rastrea. Se actualiza en cada COMMIT.
+  - .GCC/
+  - .claude/skills/gcc/
+  - .claude/skills/code-reviewer/
+  - src/modules/auth/
+  - src/modules/users/
