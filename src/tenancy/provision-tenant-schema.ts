@@ -1,6 +1,9 @@
-import { execFileSync } from 'node:child_process';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { Client } from 'pg';
 import { assertSafeSchemaName, withSchemaParam } from './schema-name.util';
+
+const execFileAsync = promisify(execFile);
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -13,8 +16,17 @@ function requireEnv(name: string): string {
 /**
  * Creates the Postgres schema (if missing) and applies every pending
  * tenant-project migration to it. Called both by scripts/migrate-tenants.ts
- * (operator-run backfill/runbook) and by AuthService.register, so a new
+ * (operator-run backfill/runbook) and by TenantProvisioningService, so a new
  * tenant's schema exists before its first authenticated request needs it.
+ *
+ * Idempotent: `CREATE SCHEMA IF NOT EXISTS` and `prisma migrate deploy` both
+ * no-op when there is nothing to do, so a failed run is safe to retry (see
+ * TenantProvisioningService.ensureProvisioned).
+ *
+ * Uses the async `execFile`, never `execFileSync`: the Prisma CLI subprocess
+ * takes ~1-2s, and a sync spawn would block the whole event loop — every
+ * other in-flight request, health check included — for that entire window.
+ * With `execFile` only the awaiting caller waits.
  *
  * Shells out to the Prisma CLI rather than using PrismaClientManager's
  * runtime client: only the CLI's classic connection URL honors a `?schema=`
@@ -38,11 +50,10 @@ export async function provisionTenantSchema(schemaName: string): Promise<void> {
     await client.end();
   }
 
-  execFileSync(
+  await execFileAsync(
     'npx',
     ['prisma', 'migrate', 'deploy', '--config', 'prisma.tenant.config.ts'],
     {
-      stdio: 'inherit',
       env: {
         ...process.env,
         TENANT_DATABASE_URL: withSchemaParam(baseUrl, schemaName),

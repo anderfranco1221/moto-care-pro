@@ -85,6 +85,30 @@ describe('PrismaClientManager', () => {
     expect(createClientSpy).not.toHaveBeenCalled();
   });
 
+  it('evicts the cache entry when connect rejects, so the next call retries', async () => {
+    createClientSpy.mockReset();
+    createClientSpy
+      .mockImplementationOnce(() => ({
+        $connect: jest.fn().mockRejectedValue(new Error('PG down')),
+        $disconnect: jest.fn().mockResolvedValue(undefined),
+      }))
+      .mockImplementationOnce((schemaName: unknown) => {
+        const client: FakeClient = {
+          $connect: jest.fn().mockResolvedValue(undefined),
+          $disconnect: jest.fn().mockResolvedValue(undefined),
+        };
+        fakeClients[schemaName as string] = client;
+        return client;
+      });
+
+    await expect(manager.getClient('tenant_a')).rejects.toThrow('PG down');
+
+    // Not a permanently-cached rejected Promise: the retry gets a fresh client.
+    const client = await manager.getClient('tenant_a');
+    expect(createClientSpy).toHaveBeenCalledTimes(2);
+    expect(client).toBe(fakeClients.tenant_a);
+  });
+
   it('disconnects and clears every cached client on module destroy', async () => {
     await manager.getClient('tenant_a');
     await manager.getClient('tenant_b');

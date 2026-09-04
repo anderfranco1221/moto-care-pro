@@ -35,8 +35,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     // the guard lets the request through) — this is the one hook point
     // every authenticated request passes through, so it's where tenant
     // context gets set for everything downstream (TenantPrismaService, etc).
-    this.tenantContext.setTenant(payload.tenantId, payload.schemaName);
-    const { password, ...result } = user;
+    //
+    // Tenant context is taken from the freshly-loaded User row, not the
+    // token's tenantId/schemaName claims: the token outlives any change to
+    // the user's tenant, and the claim would be attacker-controlled if the
+    // signing key ever leaked. The claims stay in the payload only as a
+    // debugging breadcrumb.
+    this.tenantContext.setTenant(user.tenantId, user.tenant.schemaName);
+    const { password, tenant, ...result } = user;
     return result;
   }
 }

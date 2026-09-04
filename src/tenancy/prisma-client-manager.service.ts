@@ -38,7 +38,16 @@ export class PrismaClientManager implements OnModuleDestroy {
       return cached;
     }
 
-    const pending = this.connect(schemaName);
+    // Evict the entry if the connect rejects, so a transient Postgres
+    // failure doesn't leave a permanently-rejected Promise cached for this
+    // schema (every later getClient would re-throw the stale error until
+    // the process restarts). The next call after a failure gets a fresh try.
+    const pending = this.connect(schemaName).catch((error: unknown) => {
+      if (this.clients.get(schemaName) === pending) {
+        this.clients.delete(schemaName);
+      }
+      throw error;
+    });
     this.clients.set(schemaName, pending);
     return pending;
   }
@@ -46,7 +55,10 @@ export class PrismaClientManager implements OnModuleDestroy {
   async onModuleDestroy(): Promise<void> {
     const clients = Array.from(this.clients.values());
     this.clients.clear();
-    await Promise.all(
+    // allSettled, not all: a client whose connect rejected is already
+    // evicted and has nothing to disconnect — it must not abort shutdown
+    // of the healthy clients.
+    await Promise.allSettled(
       clients.map(async (pending) => (await pending).$disconnect()),
     );
   }

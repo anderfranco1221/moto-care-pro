@@ -1,9 +1,22 @@
+enum ProvisioningStatus {
+  PENDING
+  READY
+  FAILED
+}
+
 model Tenant {
-  id         String   @id @default(uuid())
-  name       String
-  schemaName String   @unique
-  createdAt  DateTime @default(now())
-  users      User[]
+  id                 String             @id @default(uuid())
+  name               String
+  schemaName         String             @unique
+  // Schema provisioning (CREATE SCHEMA + tenant migrations) runs after the
+  // Tenant+User transaction commits, so it can fail independently. This
+  // column is the source of truth for whether the tenant's schema is
+  // usable: AuthService.signIn refuses to hand out a token while it isn't
+  // READY and re-drives provisioning, so a transient failure at signup is
+  // recoverable instead of a dead end.
+  provisioningStatus ProvisioningStatus @default(PENDING)
+  createdAt          DateTime           @default(now())
+  users              User[]
 }
 
 model User {

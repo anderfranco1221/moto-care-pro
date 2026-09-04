@@ -50,14 +50,19 @@ describe('UsersService', () => {
   });
 
   describe('findById', () => {
-    it('busca un usuario por id', async () => {
-      const user = { id: '1', email: 'a@a.com' };
+    it('busca un usuario por id incluyendo su tenant', async () => {
+      const user = {
+        id: '1',
+        email: 'a@a.com',
+        tenant: { schemaName: 'tenant_x' },
+      };
       prisma.user.findUnique.mockResolvedValue(user);
 
       const result = await service.findById('1');
 
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: '1' },
+        include: { tenant: true },
       });
       expect(result).toBe(user);
     });

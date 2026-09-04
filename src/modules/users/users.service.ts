@@ -20,8 +20,16 @@ export class UsersService {
     });
   }
 
-  async findById(id: string): Promise<User | null> {
-    return this.prisma.user.findUnique({ where: { id } });
+  /**
+   * Includes the Tenant relation: JwtStrategy.validate derives the request's
+   * tenant context from this freshly-loaded row rather than trusting the
+   * token's tenant claim.
+   */
+  async findById(id: string): Promise<UserWithTenant | null> {
+    return this.prisma.user.findUnique({
+      where: { id },
+      include: { tenant: true },
+    });
   }
 
   /** `tx` lets AuthService.register run this in the same transaction as the new Tenant. */

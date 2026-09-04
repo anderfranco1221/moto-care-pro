@@ -13,3 +13,4 @@ process.env.DATABASE_URL ||= DEFAULT_DATABASE_URL;
 process.env.TENANT_DATABASE_URL ||= process.env.DATABASE_URL;
 process.env.JWT_SECRET ||= 'e2e-secret';
 process.env.JWT_EXPIRES_IN ||= '3600';
+process.env.PORT ||= '3000';

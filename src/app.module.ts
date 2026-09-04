@@ -11,10 +11,11 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { HealthModule } from './modules/health/health.module';
 import { TenancyModule } from './tenancy/tenancy.module';
+import { validateEnv } from './config/env.validation';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, validate: validateEnv }),
     ClsModule.forRoot({ global: true, middleware: { mount: true } }),
     PrismaModule,
     MotorcyclesModule,

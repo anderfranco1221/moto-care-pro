@@ -41,31 +41,47 @@ describe('JwtStrategy', () => {
       schemaName: 'tenant_taller_abcd1234',
     };
 
-    it('devuelve el usuario sin password cuando existe', async () => {
-      usersService.findById.mockResolvedValue({
-        id: '1',
-        email: 'a@a.com',
-        password: 'hashed',
-      });
+    const dbUser = {
+      id: '1',
+      email: 'a@a.com',
+      password: 'hashed',
+      tenantId: 'tenant-1',
+      tenant: {
+        id: 'tenant-1',
+        schemaName: 'tenant_taller_abcd1234',
+      },
+    };
+
+    it('devuelve el usuario sin password ni la relación tenant cuando existe', async () => {
+      usersService.findById.mockResolvedValue(dbUser);
 
       const result = await strategy.validate(payload);
 
       expect(result).not.toHaveProperty('password');
-      expect(result).toEqual({ id: '1', email: 'a@a.com' });
-    });
-
-    it('setea el contexto de tenant con los claims del payload', async () => {
-      usersService.findById.mockResolvedValue({
+      expect(result).not.toHaveProperty('tenant');
+      expect(result).toEqual({
         id: '1',
         email: 'a@a.com',
-        password: 'hashed',
+        tenantId: 'tenant-1',
+      });
+    });
+
+    it('setea el contexto de tenant desde el User recargado, no desde el claim del token', async () => {
+      usersService.findById.mockResolvedValue({
+        ...dbUser,
+        tenantId: 'real-tenant',
+        tenant: { id: 'real-tenant', schemaName: 'tenant_real_00000000' },
       });
 
-      await strategy.validate(payload);
+      await strategy.validate({
+        ...payload,
+        tenantId: 'stale-tenant',
+        schemaName: 'tenant_stale_11111111',
+      });
 
       expect(tenantContext.setTenant).toHaveBeenCalledWith(
-        'tenant-1',
-        'tenant_taller_abcd1234',
+        'real-tenant',
+        'tenant_real_00000000',
       );
     });
 

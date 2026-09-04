@@ -20,8 +20,11 @@ type ModelDelegate = Record<string, (...args: unknown[]) => unknown>;
  *
  * Only supports the `client.<model>.<method>(...)` shape actually used in
  * this codebase (see MotorcyclesService) — not top-level PrismaClient
- * methods like `$transaction`/`$queryRaw`. Extend resolveModel's caller if
- * a future consumer needs those.
+ * methods like `$transaction`/`$queryRaw`. The declaration-merged interface
+ * below exposes exactly the model delegates the Proxy actually resolves, so
+ * calling `this.prisma.$transaction(...)` is a compile error rather than a
+ * runtime "is not a function". Widen it (and resolveModel's caller) if a
+ * future consumer needs another model or a top-level method.
  */
 @Injectable()
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
@@ -63,9 +66,14 @@ export class TenantPrismaService {
 
 // Declaration merging, not runtime inheritance: gives consumers (e.g.
 // MotorcyclesService) real `.motorcycle`/`.service`/`.appointment` typing —
-// matching PrismaClient's shape — without this class actually extending
-// PrismaClient, since the Proxy above is what provides those properties
-// at runtime, not the class body itself.
-/* eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging,
-   @typescript-eslint/no-empty-object-type -- deliberate: see comment above */
-export interface TenantPrismaService extends PrismaClient {}
+// matching PrismaClient's delegate shape — without this class extending
+// PrismaClient, since the Proxy above is what provides those properties at
+// runtime, not the class body. Deliberately narrow: only the model
+// delegates the Proxy resolves, so `$transaction`/`$queryRaw`/`$connect`
+// (which the Proxy does NOT implement) don't type-check as available.
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
+export interface TenantPrismaService {
+  motorcycle: PrismaClient['motorcycle'];
+  service: PrismaClient['service'];
+  appointment: PrismaClient['appointment'];
+}
