@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+# One in-flight run per branch; a new push cancels the previous.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: '1234'
+          POSTGRES_DB: moto-pro
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U admin -d moto-pro"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://admin:1234@localhost:5432/moto-pro
+      TENANT_DATABASE_URL: postgresql://admin:1234@localhost:5432/moto-pro
+      JWT_SECRET: ci-secret
+      JWT_EXPIRES_IN: '3600'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # postinstall generates both Prisma clients (shared + @prisma-tenant).
+      - run: npm ci
+
+      - run: npm run lint:ci
+
+      - run: npm run build
+
+      # Shared project migrations -> public. Tenant schemas are provisioned
+      # per-test by the e2e suite.
+      - run: npx prisma migrate deploy
+
+      # --runInBand: parallel jest workers have been observed to hang on
+      # small (2-core) runners; the suites are fast enough serial.
+      - run: npx jest --runInBand --ci
+      - run: npx jest --config ./test/jest-e2e.json --runInBand --ci
