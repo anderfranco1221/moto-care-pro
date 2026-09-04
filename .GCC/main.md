@@ -32,9 +32,19 @@ request path, promise rechazada cacheada, provisioning sin recovery). **NO se me
 master.** 3 `feedback-*` en memoria. Prerequisito de merge: tarea de hardening + re-review
 ≥ 80. Commit GCC: [C003].
 
+### M04 — Fase 2 (Multitenancy): gate SUPERADO tras hardening · 2026-09-04
+`code-reviewer` sobre `claude/code-review-adjustments-fa2053` (Fase 2 + hardening 4c89346):
+**89/100 → APPROVE · APTA** (correctness 28, seguridad 21, clean 18, tests 13, arq 10).
+Quality gate real: eslint/tsc PASS, unit 16/61, e2e 2/8 (tenant isolation contra PG real),
+cobertura ~69%. Los 3 Major de M03 resueltos y verificados. Commit GCC: [C004].
+**Merge `--no-ff` a master pendiente de ejecución manual** en el checkout principal
+(esta sesión está en un worktree). Integra Fase 2 completa. Sin push.
+
 ## Active Branches (recordatorio)
-- `claude/tareas-fase-2-qa-validation-c1ad86` — Fase 2, integración de tasks 1-5.
-  Estado: NO APTA para master (gate 61/100). Pendiente hardening.
+- `claude/code-review-adjustments-fa2053` — Fase 2 completa + hardening. Estado: APTA
+  (gate 89/100). Merge a master pendiente de ejecución.
+- `claude/tareas-fase-2-qa-validation-c1ad86` — rama de integración previa (tasks 1-5),
+  superada por `claude/code-review-adjustments-fa2053`.
 
 ## Active Branches
 

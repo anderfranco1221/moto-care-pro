@@ -76,3 +76,38 @@ Formato de entrada:
   en project_fase2_multitenancy.md).
   Acción: NO se mergeó a master. Fase 2 sigue en su rama de integración. Prerequisito de
   merge: tarea de hardening (3 Major + validationSchema + .env.example) y re-review ≥ 80.
+
+## [C004] Re-review Fase 2 hardening — 89/100 APPROVE — APTA PARA MERGE
+- date: 2026-09-04T01:30:00Z
+- branch: main
+- purpose: Re-gate de Fase 2 tras el hardening pedido en [C003]
+- previous: [C003] dejó Fase 2 en 61/100 NO APTA con 3 Major.
+- contribution: Aplicado `code-reviewer` sobre `git diff master...claude/code-review-adjustments-fa2053`
+  (= tip de la rama de integración de Fase 2 + commit de hardening 4c89346, ~538 ins / 76 del).
+  Quality gate REAL ejecutado en el worktree code-review-adjustments-fa2053 (node_modules
+  sincronizado, Postgres docker :5433, `--runInBand`): eslint PASS (1 warning preexistente
+  en main.ts), tsc --noEmit PASS, **unit 16 suites / 61 tests PASS** (cobertura ~69% líneas),
+  **e2e 2 suites / 8 tests PASS** (incluye tenant-isolation.e2e-spec.ts contra PG real).
+  Nota por eje: correctness 28/30, seguridad 21/25, clean-code 18/20, tests 13/15,
+  arquitectura 10/10 = **89/100 → APPROVE**.
+  merge_gate: media 89/100 (umbral 80), 0 Blockers → **APTA PARA MERGE A master**.
+  Los 3 Major de [C003] verificados como resueltos (código leído + tests):
+  (1) `provision-tenant-schema.ts` usa `promisify(execFile)` — no bloquea el event loop;
+  (2) `PrismaClientManager.getClient` evicta la entrada del Map en el `.catch` del connect
+  (con chequeo de identidad), `onModuleDestroy` usa `Promise.allSettled`;
+  (3) `Tenant.provisioningStatus` (enum PENDING|READY|FAILED) + migración
+  20260904000000_add_tenant_provisioning_status + `TenantProvisioningService.ensureProvisioned`
+  idempotente; `register()` ya no da 500 si falla; `signIn()` re-dispara provisioning y
+  devuelve 503 reintentable. Minors cerrados: `env.validation.ts` vía `ConfigModule.forRoot({ validate })`
+  + `.env.example` + vars JWT en docker-compose; `JwtStrategy.validate` deriva el tenant
+  del `User` recargado (no del claim); interfaz de `TenantPrismaService` angostada a los
+  model delegates; `CLAUDE.md` actualizado. Feedback de memoria: sin cambios (los 3
+  feedback_* de [C003] siguen válidos como guía preventiva).
+  Residual menor (no bloqueante): `register` responde en ~1-2s (provisioning async en el
+  request path, event loop libre); sin rate-limit en el endpoint `@Public()` de register;
+  camino de recuperación FAILED probado con mocks en unit, no end-to-end.
+  Acción: **APTA**. Merge `--no-ff` de `claude/code-review-adjustments-fa2053` a master
+  (integra Fase 2 completa). El merge debe ejecutarse en el checkout principal
+  (`/home/anderson/Documentos/Proyectos/Nest.js/moto-care-pro`, donde master está
+  checked out) — esta sesión corre en un worktree y no opera ahí. Comando entregado al
+  usuario. Sin push (sin credenciales).
