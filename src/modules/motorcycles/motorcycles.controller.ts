@@ -1,11 +1,12 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
 } from '@nestjs/common';
 import { MotorcyclesService } from './motorcycles.service';
 import { CreateMotorcycleDto } from './dto/create-motorcycle.dto';
@@ -26,20 +27,20 @@ export class MotorcyclesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.motorcyclesService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateMotorcycleDto: UpdateMotorcycleDto,
   ) {
     return this.motorcyclesService.update(id, updateMotorcycleDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.motorcyclesService.remove(id);
   }
 }
