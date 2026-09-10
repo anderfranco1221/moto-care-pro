@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { MovementType, Prisma } from '@prisma-tenant/client';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
+import { orNotFound } from 'src/common/not-found';
 import { CreateSupplyDto } from './dto/create-supply.dto';
 import { RegisterMovementDto } from './dto/register-movement.dto';
 import { UpdateSupplyDto } from './dto/update-supply.dto';
@@ -23,8 +24,11 @@ export class SuppliesService {
     return this.prisma.supply.findMany();
   }
 
-  findOne(id: string) {
-    return this.prisma.supply.findUnique({ where: { id } });
+  async findOne(id: string) {
+    return orNotFound(
+      await this.prisma.supply.findUnique({ where: { id } }),
+      'Supply',
+    );
   }
 
   update(id: string, dto: UpdateSupplyDto) {

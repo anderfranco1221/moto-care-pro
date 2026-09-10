@@ -16,11 +16,13 @@ model Supply {
 model StockMovement {
   id        String       @id @default(uuid())
   supplyId  String
+  serviceId String?
   type      MovementType
   quantity  Int
   reason    String?
   createdAt DateTime     @default(now())
   supply    Supply       @relation(fields: [supplyId], references: [id], onDelete: Cascade)
+  service   Service?     @relation(fields: [serviceId], references: [id], onDelete: SetNull)
 }
 
 enum MovementType {

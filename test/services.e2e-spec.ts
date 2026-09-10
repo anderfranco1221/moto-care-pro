@@ -186,6 +186,15 @@ describe('Services (e2e)', () => {
     await request(app.getHttpServer()).get('/services').expect(401);
   });
 
+  it('404s a service for a motorcycle that does not exist', async () => {
+    await authed('post', '/services', alpha.token)
+      .send({
+        motorcycleId: '11111111-1111-4111-8111-111111111111',
+        description: 'x',
+      })
+      .expect(404);
+  });
+
   it('isolates services between tenants', async () => {
     const betaBikeId = await addMotorcycle(beta, `SVC-B-${runId}`);
     await authed('post', '/services', alpha.token)
@@ -212,5 +221,63 @@ describe('Services (e2e)', () => {
     };
     expect(await countIn(alpha.schemaName)).toBe(1);
     expect(await countIn(beta.schemaName)).toBe(1);
+  });
+
+  it('consumes supplies from stock when a service is created with them', async () => {
+    const supplyRes = await authed('post', '/supplies', alpha.token)
+      .send({ name: 'Filtro', sku: `FIL-${runId}`, unit: 'u', stock: 5 })
+      .expect(201);
+    const supplyId = body<{ id: string }>(supplyRes).id;
+
+    await authed('post', '/services', alpha.token)
+      .send({
+        motorcycleId: alphaBikeId,
+        description: 'Cambio de filtro',
+        supplies: [{ supplyId, quantity: 2 }],
+      })
+      .expect(201);
+
+    const supply = await authed(
+      'get',
+      `/supplies/${supplyId}`,
+      alpha.token,
+    ).expect(200);
+    expect(body<{ stock: number }>(supply).stock).toBe(3);
+
+    const movements = await authed(
+      'get',
+      `/supplies/${supplyId}/movements`,
+      alpha.token,
+    ).expect(200);
+    expect(body<{ type: string; quantity: number }[]>(movements)).toEqual([
+      expect.objectContaining({ type: 'OUT', quantity: 2 }),
+    ]);
+  });
+
+  it('rolls back the service when a supply line is under-stocked (409)', async () => {
+    const supplyRes = await authed('post', '/supplies', alpha.token)
+      .send({ name: 'Bujía', sku: `BUJ-${runId}`, unit: 'u', stock: 1 })
+      .expect(201);
+    const supplyId = body<{ id: string }>(supplyRes).id;
+
+    const before = await authed('get', '/services', alpha.token).expect(200);
+
+    await authed('post', '/services', alpha.token)
+      .send({
+        motorcycleId: alphaBikeId,
+        description: 'Cambio de bujías',
+        supplies: [{ supplyId, quantity: 4 }],
+      })
+      .expect(409);
+
+    const after = await authed('get', '/services', alpha.token).expect(200);
+    expect(body<unknown[]>(after)).toHaveLength(body<unknown[]>(before).length);
+
+    const supply = await authed(
+      'get',
+      `/supplies/${supplyId}`,
+      alpha.token,
+    ).expect(200);
+    expect(body<{ stock: number }>(supply).stock).toBe(1);
   });
 });
