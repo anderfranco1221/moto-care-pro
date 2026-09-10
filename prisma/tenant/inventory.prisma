@@ -1,0 +1,29 @@
+// Per-tenant workshop inventory: supplies and their stock movements.
+// `Supply.stock` is kept in sync with the movement history by a single
+// nested write in the supplies service (see registerMovement).
+
+model Supply {
+  id        String          @id @default(uuid())
+  name      String
+  sku       String          @unique
+  unit      String
+  stock     Int             @default(0)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  movements StockMovement[]
+}
+
+model StockMovement {
+  id        String       @id @default(uuid())
+  supplyId  String
+  type      MovementType
+  quantity  Int
+  reason    String?
+  createdAt DateTime     @default(now())
+  supply    Supply       @relation(fields: [supplyId], references: [id], onDelete: Cascade)
+}
+
+enum MovementType {
+  IN
+  OUT
+}

@@ -76,4 +76,6 @@ export interface TenantPrismaService {
   motorcycle: PrismaClient['motorcycle'];
   service: PrismaClient['service'];
   appointment: PrismaClient['appointment'];
+  supply: PrismaClient['supply'];
+  stockMovement: PrismaClient['stockMovement'];
 }
