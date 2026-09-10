@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@prisma-tenant/client';
 import { CreateMotorcycleDto } from './dto/create-motorcycle.dto';
 import { UpdateMotorcycleDto } from './dto/update-motorcycle.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
 
 @Injectable()
 export class MotorcyclesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: TenantPrismaService) {}
 
   create(createMotorcycleDto: CreateMotorcycleDto) {
     return this.prisma.motorcycle.create({

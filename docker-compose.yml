@@ -24,6 +24,14 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://admin:1234@db:5432/moto-pro
+      # Base connection for PrismaClientManager's per-tenant clients — each
+      # is pinned to its schema via adapter-pg's `schema` option, resolved
+      # per-request from the JWT (see src/prisma/tenant-prisma.service.ts).
+      TENANT_DATABASE_URL: postgresql://admin:1234@db:5432/moto-pro
+      # Required by src/config/env.validation.ts — the app refuses to boot
+      # without them. Override JWT_SECRET for any real deployment.
+      JWT_SECRET: local-compose-secret-change-me
+      JWT_EXPIRES_IN: '86400'
       PORT: 3001
       HEALTH_CHECK_ENABLED: 'true'
     ports:

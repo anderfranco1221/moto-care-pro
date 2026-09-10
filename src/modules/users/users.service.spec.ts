@@ -31,28 +31,38 @@ describe('UsersService', () => {
   });
 
   describe('findOne', () => {
-    it('busca un usuario por email', async () => {
-      const user = { id: '1', email: 'a@a.com' };
+    it('busca un usuario por email incluyendo su tenant', async () => {
+      const user = {
+        id: '1',
+        email: 'a@a.com',
+        tenant: { schemaName: 'tenant_x' },
+      };
       prisma.user.findFirst.mockResolvedValue(user);
 
       const result = await service.findOne('a@a.com');
 
       expect(prisma.user.findFirst).toHaveBeenCalledWith({
         where: { email: 'a@a.com' },
+        include: { tenant: true },
       });
       expect(result).toBe(user);
     });
   });
 
   describe('findById', () => {
-    it('busca un usuario por id', async () => {
-      const user = { id: '1', email: 'a@a.com' };
+    it('busca un usuario por id incluyendo su tenant', async () => {
+      const user = {
+        id: '1',
+        email: 'a@a.com',
+        tenant: { schemaName: 'tenant_x' },
+      };
       prisma.user.findUnique.mockResolvedValue(user);
 
       const result = await service.findById('1');
 
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: '1' },
+        include: { tenant: true },
       });
       expect(result).toBe(user);
     });
@@ -69,10 +79,10 @@ describe('UsersService', () => {
         },
       );
 
-      const result = await service.create({
-        email: 'a@a.com',
-        password: 'plain-password',
-      });
+      const result = await service.create(
+        { email: 'a@a.com', password: 'plain-password', tenantName: 'Taller' },
+        'tenant-1',
+      );
 
       expect(prisma.user.create).toHaveBeenCalledTimes(1);
       expect(persistedPassword).not.toBe('plain-password');
@@ -86,7 +96,14 @@ describe('UsersService', () => {
       prisma.user.findFirst.mockResolvedValue({ id: '1', email: 'a@a.com' });
 
       await expect(
-        service.create({ email: 'a@a.com', password: 'plain-password' }),
+        service.create(
+          {
+            email: 'a@a.com',
+            password: 'plain-password',
+            tenantName: 'Taller',
+          },
+          'tenant-1',
+        ),
       ).rejects.toThrow(ConflictException);
       expect(prisma.user.create).not.toHaveBeenCalled();
     });

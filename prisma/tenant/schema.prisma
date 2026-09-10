@@ -1,0 +1,17 @@
+// Prisma project for per-tenant schema data (Motorcycle/Service/Appointment).
+// Migrated independently from prisma/shared — see scripts/migrate-tenants.ts.
+// Its generated client is separate from the default @prisma/client (shared project)
+// so tenant models never mix with Tenant/User types.
+
+generator client {
+  provider = "prisma-client-js"
+  // Generated inside node_modules (not prisma/generated) so it resolves as a
+  // normal module specifier from both src/ and the compiled dist/ output —
+  // a relative path here breaks at runtime once Nest builds to dist/.
+  output   = "../../node_modules/@prisma-tenant/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Connection URL moved to prisma.tenant.config.ts for Prisma 7+.
+}
