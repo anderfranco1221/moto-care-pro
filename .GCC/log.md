@@ -48,3 +48,8 @@ Formato de entrada (máx 50, FIFO):
 - O: usuario pide continuar fases 3/4/5 con gate code-review antes de cada PR; PRs #1 (Fase 2) y #2 (CI+tooling) ya en master
 - T: landear el trabajo pendiente de claude/integration por tarea; empezar por F3.1 services que ya estaba implementado y verde
 - A: rebased fase-3.1-services sobre master limpio; gate 92/100 APPROVE; [C005]; PR #3. Pollución de public con tablas tenant (por `migrate deploy` sin ?schema= contra la DB compartida) detectada y limpiada — el e2e de aislamiento volvió a verde
+
+### [L009] 2026-09-10T23:25:00Z (main)
+- O: F3.2 appointments — no existía módulo; construir CRUD espejando el patrón de services (el más limpio: ParseUUIDPipe + tests por método)
+- T: mantener consistencia con services/motorcycles; DTO con userId/motorcycleId UUID + scheduledAt ISO; e2e con aislamiento cross-tenant
+- A: módulo + unit (10) + e2e (6, incl. bad date); gate 91/100 APPROVE; [C006]; PR #4 apilada sobre #3
