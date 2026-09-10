@@ -53,8 +53,17 @@ cross-tenant de services contra PG real). 0 Blockers. Findings menores → follo
 F3.4 (fila inexistente → 500 en PATCH/DELETE; FK motorcycleId no verificada; patrón
 compartido con el módulo motorcycles). Commit GCC: [C005]. PR #3.
 
+### M07 — Fase 3.2 (módulo appointments) revisada · 2026-09-10
+`code-reviewer` sobre `fase-3.2-appointments` (diff vs `fase-3.1-services`): **91/100 →
+APPROVE · APTA** (correctness 25, seguridad 23, clean 19, tests 14, arq 10). Quality gate:
+eslint PASS (1 warning preexistente), tsc PASS, unit 20/81, e2e 4/19 (incl. aislamiento
+cross-tenant de appointments contra PG real). 0 Blockers. Findings menores → F3.4 (fila
+inexistente → 500; FK userId/motorcycleId no verificada; `userId` viene del body en vez
+del JWT). Commit GCC: [C006]. PR #4 (apilada sobre #3).
+
 ## Active Branches (recordatorio)
 - `fase-3.1-services` — F3.1 services CRUD. Estado: APTA (92/100). PR #3 abierta.
+- `fase-3.2-appointments` — F3.2 appointments CRUD. Estado: APTA (91/100). PR #4, apilada sobre #3.
 
 ## Active Branches
 
