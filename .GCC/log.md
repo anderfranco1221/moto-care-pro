@@ -63,3 +63,8 @@ Formato de entrada (máx 50, FIFO):
 - O: F3.4 cierra Fase 3 — "relaciones y validaciones entre motos, servicios, citas e insumos"; el Proxy de TenantPrismaService no soportaba $transaction
 - T: filtro global de excepciones Prisma (404/409/422) + orNotFound en findOne + validación de FK (motorcycleId) + userId desde JWT + Service que consume stock en $transaction (rollback atómico)
 - A: PrismaExceptionFilter (APP_FILTER), CurrentUser decorator, $transaction reenviado por el Proxy, migración link_service_stock_movements; gate 91/100 APPROVE; [C008]; PR #6; Fase 3 completa
+
+### [L012] 2026-09-10T00:15:00Z (main)
+- O: F4.3 — rate limiting + logging estructurado + revisar healthcheck; el register @Public() era vector de DoS ([C003])
+- T: @nestjs/throttler (5/min en auth), nestjs-pino (JSON prod / pretty dev, redacción de secretos), verificar que la imagen podada (sin pino-pretty, NODE_ENV=production) arranca
+- A: throttler + pino + x-powered-by off; skipIf(THROTTLE_DISABLED) para e2e + throttle.e2e-spec dedicado; imagen docker verificada (JSON logs, 429, /health 200); healthcheck actual ya es adecuado; gate 93/100; [C009]; PR #7
