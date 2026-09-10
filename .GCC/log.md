@@ -68,3 +68,8 @@ Formato de entrada (máx 50, FIFO):
 - O: F4.3 — rate limiting + logging estructurado + revisar healthcheck; el register @Public() era vector de DoS ([C003])
 - T: @nestjs/throttler (5/min en auth), nestjs-pino (JSON prod / pretty dev, redacción de secretos), verificar que la imagen podada (sin pino-pretty, NODE_ENV=production) arranca
 - A: throttler + pino + x-powered-by off; skipIf(THROTTLE_DISABLED) para e2e + throttle.e2e-spec dedicado; imagen docker verificada (JSON logs, 429, /health 200); healthcheck actual ya es adecuado; gate 93/100; [C009]; PR #7
+
+### [L013] 2026-09-10T00:35:00Z (main)
+- O: F4.4 — "unit tests de todos los services de dominio + e2e por tenant"; motorcycles solo tenía stubs, health 0%
+- T: specs reales de motorcycles + health, motorcycles.e2e nuevo, ParseUUIDPipe en motorcycles para consistencia, coverageThreshold enforced en CI
+- A: unit 25/118, e2e 7/36, cobertura 94% stmts; threshold 88/80/85/88; gate 90/100; [C010]; PR #8; Fase 4 cerrada

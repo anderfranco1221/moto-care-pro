@@ -105,9 +105,23 @@ Sigue Fase 4 (calidad): F4.3 rate-limit + logging, F4.4 tests. F4.1 (CI) ya est�
 Quality gate: eslint/tsc PASS, unit 24/106, e2e 6/32, `docker compose build` + smoke PASS.
 Commit GCC: [C009]. PR #7 (apilada sobre #6).
 
+### M11 — Fase 4.4 (tests de dominio + gate de cobertura) — Fase 4 CERRADA · 2026-09-10
+`code-reviewer` sobre `fase-4.4-domain-tests`: **90/100 → APPROVE · APTA** (correctness 26,
+seguridad 23, clean 18, tests 14, arq 9). 0 Blockers.
+- Unit reales para `MotorcyclesService`/`Controller` (eran stubs "should be defined") +
+  `HealthController` spec nuevo. `test/motorcycles.e2e-spec.ts` nuevo (CRUD por tenant).
+- `MotorcyclesController` :id ahora por `ParseUUIDPipe` (consistencia con los otros 3).
+- `coverageThreshold` en package.json (88/80/85/88), `main.ts`+`*.module.ts` excluidos;
+  CI corre el unit con `--coverage`. Cobertura: 94% stmts / 84% branches.
+Quality gate: eslint/tsc PASS, unit 25/118, e2e 7/36, build PASS. Commit GCC: [C010]. PR #8.
+
+**Fase 4 completa** (F4.1 CI + F4.3 throttler/logging + F4.4 tests). Fase 5 (frontend)
+diferida. Pendiente: README + CLAUDE.md.
+
 ## Active Branches (recordatorio)
-- `fase-3.4-relations` — F3.4. Estado: APTA (91/100). PR #6.
-- `fase-4.3-throttler-logging` — F4.3. Estado: APTA (93/100). PR #7 → apilada sobre #6.
+- `fase-3.4-relations` — F3.4 APTA (91). PR #6.
+- `fase-4.3-throttler-logging` — F4.3 APTA (93). PR #7 → sobre #6.
+- `fase-4.4-domain-tests` — F4.4 APTA (90). PR #8 → sobre #7.
 
 ## Active Branches
 
