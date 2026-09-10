@@ -53,3 +53,8 @@ Formato de entrada (máx 50, FIFO):
 - O: F3.2 appointments — no existía módulo; construir CRUD espejando el patrón de services (el más limpio: ParseUUIDPipe + tests por método)
 - T: mantener consistencia con services/motorcycles; DTO con userId/motorcycleId UUID + scheduledAt ISO; e2e con aislamiento cross-tenant
 - A: módulo + unit (10) + e2e (6, incl. bad date); gate 91/100 APPROVE; [C006]; PR #4 apilada sobre #3
+
+### [L010] 2026-09-10T23:40:00Z (main)
+- O: F3.3 insumos/inventario — modelos nuevos en prisma/tenant + endpoint de movimiento de stock; TenantPrismaService (Proxy) no soporta $transaction
+- T: atomicidad del movimiento vía nested write de Prisma (supply.update con movements.create), no $transaction; guard de stock negativo con where condicional; migración por migrate diff (DB compartida, migrate dev pide reset)
+- A: módulo supplies (7 endpoints) + unit 12 + e2e 7; interfaz TenantPrismaService ampliada; gate 93/100 APPROVE; [C007]; PR #5 apilada sobre #4

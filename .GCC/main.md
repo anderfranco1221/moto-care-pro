@@ -61,9 +61,21 @@ cross-tenant de appointments contra PG real). 0 Blockers. Findings menores → F
 inexistente → 500; FK userId/motorcycleId no verificada; `userId` viene del body en vez
 del JWT). Commit GCC: [C006]. PR #4 (apilada sobre #3).
 
+### M08 — Fase 3.3 (módulo supplies / inventario) revisada · 2026-09-10
+`code-reviewer` sobre `fase-3.3-inventory` (diff vs `fase-3.2-appointments`): **93/100 →
+APPROVE · APTA** (correctness 26, seguridad 24, clean 19, tests 14, arq 10). Modelos
+`Supply` + `StockMovement` (enum `MovementType` IN/OUT) en `prisma/tenant/inventory.prisma`
++ migración `20260910233000_add_inventory` (generada con `migrate diff`, no `migrate dev`,
+por la DB compartida). Endpoint `POST /supplies/:id/movements` = nested write atómico
+(movimiento + delta de stock); OUT que deja stock negativo → 409 vía `where` condicional.
+Interfaz de `TenantPrismaService` ampliada (supply/stockMovement) — anticipado en follow-up
+de [C004]. Quality gate: eslint/tsc PASS, unit 22/94, e2e 5/26. 0 Blockers. Commit GCC:
+[C007]. PR #5 (apilada sobre #4).
+
 ## Active Branches (recordatorio)
-- `fase-3.1-services` — F3.1 services CRUD. Estado: APTA (92/100). PR #3 abierta.
-- `fase-3.2-appointments` — F3.2 appointments CRUD. Estado: APTA (91/100). PR #4, apilada sobre #3.
+- `fase-3.1-services` — F3.1 services CRUD. Estado: APTA (92/100). PR #3.
+- `fase-3.2-appointments` — F3.2 appointments CRUD. Estado: APTA (91/100). PR #4 → apilada sobre #3.
+- `fase-3.3-inventory` — F3.3 supplies + stock movements. Estado: APTA (93/100). PR #5 → apilada sobre #4.
 
 ## Active Branches
 
