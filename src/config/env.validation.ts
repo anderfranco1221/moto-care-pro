@@ -3,10 +3,22 @@ import {
   IsNotEmpty,
   IsString,
   IsInt,
+  IsOptional,
+  IsIn,
   Min,
   Max,
   validateSync,
 } from 'class-validator';
+
+const LOG_LEVELS = [
+  'fatal',
+  'error',
+  'warn',
+  'info',
+  'debug',
+  'trace',
+  'silent',
+] as const;
 
 /**
  * Fails the boot if a required env var is missing or malformed, instead of
@@ -38,6 +50,12 @@ export class EnvVars {
   @Min(1)
   @Max(65535)
   PORT!: number;
+
+  // Optional: pino level (see src/common/logger.config.ts). Defaults by
+  // NODE_ENV when unset.
+  @IsOptional()
+  @IsIn(LOG_LEVELS)
+  LOG_LEVEL?: (typeof LOG_LEVELS)[number];
 }
 
 export function validateEnv(config: Record<string, unknown>): EnvVars {
