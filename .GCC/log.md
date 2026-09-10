@@ -73,3 +73,8 @@ Formato de entrada (máx 50, FIFO):
 - O: F4.4 — "unit tests de todos los services de dominio + e2e por tenant"; motorcycles solo tenía stubs, health 0%
 - T: specs reales de motorcycles + health, motorcycles.e2e nuevo, ParseUUIDPipe en motorcycles para consistencia, coverageThreshold enforced en CI
 - A: unit 25/118, e2e 7/36, cobertura 94% stmts; threshold 88/80/85/88; gate 90/100; [C010]; PR #8; Fase 4 cerrada
+
+### [L014] 2026-09-10T00:45:00Z (main)
+- O: usuario pidió actualizar el README; CLAUDE.md quedó parcialmente desactualizado tras Fases 3-4
+- T: README real (era stub) + refresh quirúrgico de CLAUDE.md; sin code review formal (docs)
+- A: PR #9 apilada sobre #8. Fases 0-4 documentadas. Fin de la tanda: 8 PRs (#2-#9), gates 90-93/100
