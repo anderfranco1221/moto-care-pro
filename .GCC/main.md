@@ -40,11 +40,21 @@ cobertura ~69%. Los 3 Major de M03 resueltos y verificados. Commit GCC: [C004].
 **Merge `--no-ff` a master pendiente de ejecución manual** en el checkout principal
 (esta sesión está en un worktree). Integra Fase 2 completa. Sin push.
 
+### M05 — Fase 2 en master · 2026-09-10
+PR #1 `fase-2-multitenancy` MERGED a master (schema-per-tenant completo + hardening).
+PR #2 `chore/gcc-ci-tooling` MERGED: CI GitHub Actions (Fase 4.1) + skills `/gcc` y
+`code-reviewer` + `.GCC/`. master = 7ead3db.
+
+### M06 — Fase 3.1 (módulo services) revisada · 2026-09-10
+`code-reviewer` sobre `fase-3.1-services` (`git diff master...HEAD`): **92/100 → APPROVE ·
+APTA** (correctness 25, seguridad 24, clean 19, tests 14, arq 10). Quality gate real:
+eslint PASS (1 warning preexistente), tsc PASS, unit 18/71, e2e 3/13 (incl. aislamiento
+cross-tenant de services contra PG real). 0 Blockers. Findings menores → follow-up en
+F3.4 (fila inexistente → 500 en PATCH/DELETE; FK motorcycleId no verificada; patrón
+compartido con el módulo motorcycles). Commit GCC: [C005]. PR #3.
+
 ## Active Branches (recordatorio)
-- `claude/code-review-adjustments-fa2053` — Fase 2 completa + hardening. Estado: APTA
-  (gate 89/100). Merge a master pendiente de ejecución.
-- `claude/tareas-fase-2-qa-validation-c1ad86` — rama de integración previa (tasks 1-5),
-  superada por `claude/code-review-adjustments-fa2053`.
+- `fase-3.1-services` — F3.1 services CRUD. Estado: APTA (92/100). PR #3 abierta.
 
 ## Active Branches
 
