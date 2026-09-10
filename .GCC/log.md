@@ -58,3 +58,8 @@ Formato de entrada (máx 50, FIFO):
 - O: F3.3 insumos/inventario — modelos nuevos en prisma/tenant + endpoint de movimiento de stock; TenantPrismaService (Proxy) no soporta $transaction
 - T: atomicidad del movimiento vía nested write de Prisma (supply.update con movements.create), no $transaction; guard de stock negativo con where condicional; migración por migrate diff (DB compartida, migrate dev pide reset)
 - A: módulo supplies (7 endpoints) + unit 12 + e2e 7; interfaz TenantPrismaService ampliada; gate 93/100 APPROVE; [C007]; PR #5 apilada sobre #4
+
+### [L011] 2026-09-10T23:55:00Z (main)
+- O: F3.4 cierra Fase 3 — "relaciones y validaciones entre motos, servicios, citas e insumos"; el Proxy de TenantPrismaService no soportaba $transaction
+- T: filtro global de excepciones Prisma (404/409/422) + orNotFound en findOne + validación de FK (motorcycleId) + userId desde JWT + Service que consume stock en $transaction (rollback atómico)
+- A: PrismaExceptionFilter (APP_FILTER), CurrentUser decorator, $transaction reenviado por el Proxy, migración link_service_stock_movements; gate 91/100 APPROVE; [C008]; PR #6; Fase 3 completa

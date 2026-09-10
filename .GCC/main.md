@@ -72,10 +72,27 @@ Interfaz de `TenantPrismaService` ampliada (supply/stockMovement) — anticipado
 de [C004]. Quality gate: eslint/tsc PASS, unit 22/94, e2e 5/26. 0 Blockers. Commit GCC:
 [C007]. PR #5 (apilada sobre #4).
 
+### M09 — Fase 3.4 (relaciones + validaciones) revisada — Fase 3 CERRADA · 2026-09-10
+PRs #3/#4/#5 mergeadas a master (F3.1/F3.2/F3.3). `code-reviewer` sobre `fase-3.4-relations`
+(diff vs master): **91/100 → APPROVE · APTA** (correctness 26, seguridad 24, clean 18,
+tests 13, arq 10). 0 Blockers.
+- `PrismaExceptionFilter` global: P2025→404, P2002→409, P2003→422 (no más 500 por id
+  viejo / sku duplicado / FK mala).
+- `orNotFound()` en todos los `findOne` de dominio (404 en vez de 200+null).
+- services/appointments validan `motorcycleId` contra una moto del tenant (404, también
+  bloquea referenciar la moto de otro tenant).
+- `Appointment.userId` sale del JWT (`@CurrentUser()`), no del body.
+- `Service` con `supplies: [{supplyId, quantity}]` → descuenta stock + `StockMovement` OUT
+  en un `$transaction` con el insert del Service; línea sin stock → rollback + 409.
+  Nueva relación `StockMovement.serviceId` + migración `20260910234500_link_service_stock_movements`.
+- `TenantPrismaService` reenvía `$transaction` al cliente del tenant (rama `$`-prefix + interfaz).
+Quality gate: eslint/tsc PASS, unit 23/102, e2e 5/31, build PASS. Commit GCC: [C008]. PR #6.
+
+**Fase 3 (dominio del taller) completa** — los 4 ítems del roadmap de Notion cerrados.
+Sigue Fase 4 (calidad): F4.3 rate-limit + logging, F4.4 tests. F4.1 (CI) ya está.
+
 ## Active Branches (recordatorio)
-- `fase-3.1-services` — F3.1 services CRUD. Estado: APTA (92/100). PR #3.
-- `fase-3.2-appointments` — F3.2 appointments CRUD. Estado: APTA (91/100). PR #4 → apilada sobre #3.
-- `fase-3.3-inventory` — F3.3 supplies + stock movements. Estado: APTA (93/100). PR #5 → apilada sobre #4.
+- `fase-3.4-relations` — F3.4. Estado: APTA (91/100). PR #6.
 
 ## Active Branches
 
