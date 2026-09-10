@@ -43,3 +43,8 @@ Formato de entrada (máx 50, FIFO):
 - O: master está checked out en el checkout principal; esta sesión corre en un worktree y tiene bloqueado operar ahí
 - T: no puedo ejecutar el merge yo; registrar APTA y entregar el comando exacto al usuario
 - A: [C004] marcado APTA, merge pendiente de ejecución manual en el checkout principal; sin push
+
+### [L008] 2026-09-10T23:15:00Z (main)
+- O: usuario pide continuar fases 3/4/5 con gate code-review antes de cada PR; PRs #1 (Fase 2) y #2 (CI+tooling) ya en master
+- T: landear el trabajo pendiente de claude/integration por tarea; empezar por F3.1 services que ya estaba implementado y verde
+- A: rebased fase-3.1-services sobre master limpio; gate 92/100 APPROVE; [C005]; PR #3. Pollución de public con tablas tenant (por `migrate deploy` sin ?schema= contra la DB compartida) detectada y limpiada — el e2e de aislamiento volvió a verde
