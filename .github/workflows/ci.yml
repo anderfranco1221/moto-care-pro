@@ -56,5 +56,6 @@ jobs:
 
       # --runInBand: parallel jest workers have been observed to hang on
       # small (2-core) runners; the suites are fast enough serial.
-      - run: npx jest --runInBand --ci
+      # --coverage enforces the coverageThreshold in package.json.
+      - run: npx jest --runInBand --ci --coverage
       - run: npx jest --config ./test/jest-e2e.json --runInBand --ci

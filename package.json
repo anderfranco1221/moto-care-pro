@@ -96,9 +96,19 @@
       "^src/(.*)$": "<rootDir>/$1"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!main.ts",
+      "!**/*.module.ts"
     ],
     "coverageDirectory": "../coverage",
+    "coverageThreshold": {
+      "global": {
+        "statements": 88,
+        "branches": 80,
+        "functions": 85,
+        "lines": 88
+      }
+    },
     "testEnvironment": "node"
   },
   "type": "commonjs"
