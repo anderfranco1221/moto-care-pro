@@ -1,10 +1,25 @@
+import { Type } from 'class-transformer';
 import {
+  ArrayMinSize,
+  IsArray,
   IsDateString,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
+  Min,
+  ValidateNested,
 } from 'class-validator';
+
+export class ServiceSupplyDto {
+  @IsUUID()
+  supplyId!: string;
+
+  @IsInt()
+  @Min(1)
+  quantity!: number;
+}
 
 export class CreateServiceDto {
   @IsUUID()
@@ -23,4 +38,12 @@ export class CreateServiceDto {
   @IsString()
   @IsNotEmpty()
   mechanic?: string;
+
+  /** Supplies consumed by this service — each one is deducted from stock. */
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => ServiceSupplyDto)
+  supplies?: ServiceSupplyDto[];
 }

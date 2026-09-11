@@ -10,12 +10,13 @@ model Motorcycle {
 }
 
 model Service {
-  id           String     @id @default(uuid())
-  motorcycleId String
-  description  String
-  performedAt  DateTime   @default(now())
-  mechanic     String?
-  motorcycle   Motorcycle @relation(fields: [motorcycleId], references: [id])
+  id             String          @id @default(uuid())
+  motorcycleId   String
+  description    String
+  performedAt    DateTime        @default(now())
+  mechanic       String?
+  motorcycle     Motorcycle      @relation(fields: [motorcycleId], references: [id])
+  stockMovements StockMovement[]
 }
 
 model Appointment {

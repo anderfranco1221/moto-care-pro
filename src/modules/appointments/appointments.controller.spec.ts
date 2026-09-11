@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppointmentsController } from './appointments.controller';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import type { AuthenticatedUser } from '../auth/auth.service';
 
 describe('AppointmentsController', () => {
   let controller: AppointmentsController;
@@ -27,14 +28,16 @@ describe('AppointmentsController', () => {
   });
 
   const dto: CreateAppointmentDto = {
-    userId: '22222222-2222-2222-2222-222222222222',
     motorcycleId: '11111111-1111-1111-1111-111111111111',
     scheduledAt: '2026-10-01T09:00:00.000Z',
   };
+  const user = {
+    id: '22222222-2222-2222-2222-222222222222',
+  } as AuthenticatedUser;
 
-  it('POST / forwards the body to appointments.create', () => {
-    void controller.create(dto);
-    expect(appointmentsService.create).toHaveBeenCalledWith(dto);
+  it('POST / forwards the body and the authenticated user id', () => {
+    void controller.create(dto, user);
+    expect(appointmentsService.create).toHaveBeenCalledWith(dto, user.id);
   });
 
   it('GET / forwards to appointments.findAll', () => {

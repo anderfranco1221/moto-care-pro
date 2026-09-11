@@ -3,6 +3,7 @@ import { Prisma } from '@prisma-tenant/client';
 import { CreateMotorcycleDto } from './dto/create-motorcycle.dto';
 import { UpdateMotorcycleDto } from './dto/update-motorcycle.dto';
 import { TenantPrismaService } from 'src/prisma/tenant-prisma.service';
+import { orNotFound } from 'src/common/not-found';
 
 @Injectable()
 export class MotorcyclesService {
@@ -18,12 +19,11 @@ export class MotorcyclesService {
     return this.prisma.motorcycle.findMany();
   }
 
-  findOne(id: string) {
-    return this.prisma.motorcycle.findFirst({
-      where: {
-        id: id,
-      },
-    });
+  async findOne(id: string) {
+    return orNotFound(
+      await this.prisma.motorcycle.findUnique({ where: { id } }),
+      'Motorcycle',
+    );
   }
 
   update(id: string, updateMotorcycleDto: UpdateMotorcycleDto) {

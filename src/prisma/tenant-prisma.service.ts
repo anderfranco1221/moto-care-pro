@@ -18,13 +18,12 @@ type ModelDelegate = Record<string, (...args: unknown[]) => unknown>;
  * injects this, transitively, to also become request-scoped — the Proxy
  * indirection gets per-request routing without that cost.
  *
- * Only supports the `client.<model>.<method>(...)` shape actually used in
- * this codebase (see MotorcyclesService) — not top-level PrismaClient
- * methods like `$transaction`/`$queryRaw`. The declaration-merged interface
- * below exposes exactly the model delegates the Proxy actually resolves, so
- * calling `this.prisma.$transaction(...)` is a compile error rather than a
- * runtime "is not a function". Widen it (and resolveModel's caller) if a
- * future consumer needs another model or a top-level method.
+ * Supports the `client.<model>.<method>(...)` shape (see MotorcyclesService)
+ * plus `$transaction`, which forwards straight to the resolved per-tenant
+ * client. The declaration-merged interface below exposes exactly what the
+ * Proxy resolves, so calling e.g. `this.prisma.$queryRaw(...)` is a compile
+ * error rather than a runtime "is not a function" — widen it (the interface
+ * and the Proxy's `$`-prefix branch) if a future consumer needs more.
  */
 @Injectable()
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
@@ -34,9 +33,20 @@ export class TenantPrismaService {
     private readonly tenantContext: TenantContextService,
   ) {
     return new Proxy(this, {
-      get: (target, modelName, receiver) => {
-        if (typeof modelName === 'symbol' || modelName in target) {
-          return Reflect.get(target, modelName, receiver);
+      get: (target, prop, receiver) => {
+        if (typeof prop === 'symbol' || prop in target) {
+          return Reflect.get(target, prop, receiver);
+        }
+        // Top-level client methods (`$transaction`, ...) forward straight to
+        // the resolved client — the domain uses `$transaction` to keep a
+        // Service and the stock movements it consumes in one atomic write.
+        if (prop.startsWith('$')) {
+          return (...args: unknown[]) =>
+            target
+              .resolveClient()
+              .then((client) =>
+                (client as unknown as ModelDelegate)[prop](...args),
+              );
         }
         return new Proxy(
           {},
@@ -47,7 +57,7 @@ export class TenantPrismaService {
               }
               return (...args: unknown[]) =>
                 target
-                  .resolveModel(modelName)
+                  .resolveModel(prop)
                   .then((model) => model[methodName](...args));
             },
           },
@@ -56,10 +66,12 @@ export class TenantPrismaService {
     });
   }
 
+  private resolveClient(): Promise<PrismaClient> {
+    return this.clientManager.getClient(this.tenantContext.getSchemaName());
+  }
+
   private async resolveModel(modelName: string): Promise<ModelDelegate> {
-    const client = await this.clientManager.getClient(
-      this.tenantContext.getSchemaName(),
-    );
+    const client = await this.resolveClient();
     return (client as unknown as Record<string, ModelDelegate>)[modelName];
   }
 }
@@ -68,9 +80,9 @@ export class TenantPrismaService {
 // MotorcyclesService) real `.motorcycle`/`.service`/`.appointment` typing —
 // matching PrismaClient's delegate shape — without this class extending
 // PrismaClient, since the Proxy above is what provides those properties at
-// runtime, not the class body. Deliberately narrow: only the model
-// delegates the Proxy resolves, so `$transaction`/`$queryRaw`/`$connect`
-// (which the Proxy does NOT implement) don't type-check as available.
+// runtime, not the class body. Narrow on purpose: the model delegates the
+// Proxy resolves, plus `$transaction` (forwarded to the resolved client).
+// `$queryRaw`/`$connect` etc. stay off the type until something needs them.
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface TenantPrismaService {
   motorcycle: PrismaClient['motorcycle'];
@@ -78,4 +90,5 @@ export interface TenantPrismaService {
   appointment: PrismaClient['appointment'];
   supply: PrismaClient['supply'];
   stockMovement: PrismaClient['stockMovement'];
+  $transaction: PrismaClient['$transaction'];
 }

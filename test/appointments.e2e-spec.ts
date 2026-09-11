@@ -32,6 +32,7 @@ interface LoginResponse {
 }
 interface AppointmentRow {
   id: string;
+  userId: string;
   notes: string | null;
   scheduledAt: string;
 }
@@ -94,8 +95,7 @@ describe('Appointments (e2e)', () => {
     return body<{ id: string }>(res).id;
   }
 
-  const appointmentFor = (tenant: Tenant, motorcycleId: string) => ({
-    userId: tenant.userId,
+  const appointmentFor = (motorcycleId: string) => ({
     motorcycleId,
     scheduledAt: '2026-10-01T09:00:00.000Z',
   });
@@ -151,9 +151,11 @@ describe('Appointments (e2e)', () => {
 
   it('runs a full create/read/update/delete cycle', async () => {
     const created = await authed('post', '/appointments', alpha.token)
-      .send(appointmentFor(alpha, alphaBikeId))
+      .send(appointmentFor(alphaBikeId))
       .expect(201);
     const { id } = body<AppointmentRow>(created);
+    // userId is taken from the caller's JWT, not the request body.
+    expect(body<AppointmentRow>(created).userId).toBe(alpha.userId);
 
     const list = await authed('get', '/appointments', alpha.token).expect(200);
     expect(body<AppointmentRow[]>(list).map((a) => a.id)).toEqual([id]);
@@ -186,22 +188,27 @@ describe('Appointments (e2e)', () => {
 
   it('rejects an appointment with a non-UUID motorcycleId', async () => {
     await authed('post', '/appointments', alpha.token)
-      .send({
-        userId: alpha.userId,
-        motorcycleId: 'nope',
-        scheduledAt: '2026-10-01T09:00:00.000Z',
-      })
+      .send({ motorcycleId: 'nope', scheduledAt: '2026-10-01T09:00:00.000Z' })
       .expect(400);
   });
 
   it('rejects an appointment with a non-ISO scheduledAt', async () => {
     await authed('post', '/appointments', alpha.token)
-      .send({
-        userId: alpha.userId,
-        motorcycleId: alphaBikeId,
-        scheduledAt: 'next tuesday',
-      })
+      .send({ motorcycleId: alphaBikeId, scheduledAt: 'next tuesday' })
       .expect(400);
+  });
+
+  it('404s an appointment for a motorcycle that does not exist', async () => {
+    await authed('post', '/appointments', alpha.token)
+      .send(appointmentFor('11111111-1111-4111-8111-111111111111'))
+      .expect(404);
+  });
+
+  it('404s an appointment for another tenant’s motorcycle', async () => {
+    const betaBikeId = await addMotorcycle(beta, `APPT-XT-${runId}`);
+    await authed('post', '/appointments', alpha.token)
+      .send(appointmentFor(betaBikeId))
+      .expect(404);
   });
 
   it('rejects unauthenticated access', async () => {
@@ -211,10 +218,10 @@ describe('Appointments (e2e)', () => {
   it('isolates appointments between tenants', async () => {
     const betaBikeId = await addMotorcycle(beta, `APPT-B-${runId}`);
     await authed('post', '/appointments', alpha.token)
-      .send({ ...appointmentFor(alpha, alphaBikeId), notes: 'alpha-only' })
+      .send({ ...appointmentFor(alphaBikeId), notes: 'alpha-only' })
       .expect(201);
     await authed('post', '/appointments', beta.token)
-      .send({ ...appointmentFor(beta, betaBikeId), notes: 'beta-only' })
+      .send({ ...appointmentFor(betaBikeId), notes: 'beta-only' })
       .expect(201);
 
     const alphaList = await authed('get', '/appointments', alpha.token).expect(
