@@ -14,3 +14,8 @@ process.env.TENANT_DATABASE_URL ||= process.env.DATABASE_URL;
 process.env.JWT_SECRET ||= 'e2e-secret';
 process.env.JWT_EXPIRES_IN ||= '3600';
 process.env.PORT ||= '3000';
+// Keep the shared 100/min + auth 5/min limits out of the way of suites that
+// register several tenants back to back. throttle.e2e-spec.ts clears this
+// for its own run.
+process.env.THROTTLE_DISABLED ||= 'true';
+process.env.LOG_LEVEL ||= 'silent';

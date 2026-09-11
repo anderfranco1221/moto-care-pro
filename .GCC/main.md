@@ -91,8 +91,23 @@ Quality gate: eslint/tsc PASS, unit 23/102, e2e 5/31, build PASS. Commit GCC: [C
 **Fase 3 (dominio del taller) completa** — los 4 ítems del roadmap de Notion cerrados.
 Sigue Fase 4 (calidad): F4.3 rate-limit + logging, F4.4 tests. F4.1 (CI) ya está.
 
+### M10 — Fase 4.3 (rate limiting + logging) revisada · 2026-09-10
+`code-reviewer` sobre `fase-4.3-throttler-logging` (diff vs `fase-3.4-relations`): **93/100
+→ APPROVE · APTA** (correctness 27, seguridad 24, clean 19, tests 13, arq 10). 0 Blockers.
+- `@nestjs/throttler`: 100/min/IP global; `/auth/login` y `/auth/register` a 5/min vía
+  `@Throttle()` (superficie `@Public()` del [C003]). `skipIf(THROTTLE_DISABLED)` para los
+  e2e; `throttle.e2e-spec.ts` lo limpia y verifica el 429 real.
+- `nestjs-pino`: JSON en prod, pretty en dev, `LOG_LEVEL` configurable; redacta
+  `authorization`/`cookie`/`password`; `/health` sin log de request.
+- `main.ts`: logger de Nest → pino (bufferLogs), `x-powered-by` deshabilitado.
+- **Imagen de producción podada verificada** (NODE_ENV=production, sin pino-pretty):
+  arranca, loguea JSON, `/health` 200, 429 + Retry-After tras 5 logins.
+Quality gate: eslint/tsc PASS, unit 24/106, e2e 6/32, `docker compose build` + smoke PASS.
+Commit GCC: [C009]. PR #7 (apilada sobre #6).
+
 ## Active Branches (recordatorio)
 - `fase-3.4-relations` — F3.4. Estado: APTA (91/100). PR #6.
+- `fase-4.3-throttler-logging` — F4.3. Estado: APTA (93/100). PR #7 → apilada sobre #6.
 
 ## Active Branches
 
